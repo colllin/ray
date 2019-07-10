@@ -13,19 +13,27 @@ from ray.rllib.utils.annotations import PublicAPI
 class TorchModel(nn.Module):
     """Defines an abstract network model for use with RLlib / PyTorch."""
 
-    def __init__(self, obs_space, num_outputs, options):
+    def __init__(self, input_dict, obs_space, action_space, num_outputs, options, state_in=None, seq_lens=None):
         """All custom RLlib torch models must support this constructor.
 
         Arguments:
+            input_dict (dict): Dictionary of input tensors, including "obs",
+                "prev_action", "prev_reward", "is_training".
             obs_space (gym.Space): Input observation space.
             num_outputs (int): Output tensor must be of size
                 [BATCH_SIZE, num_outputs].
             options (dict): Dictionary of model options.
         """
+        assert isinstance(input_dict, dict), input_dict
         nn.Module.__init__(self)
+        self.state_init = []
+        self.state_in = state_in or []
+        self.state_out = []
         self.obs_space = obs_space
+        self.action_space = action_space
         self.num_outputs = num_outputs
         self.options = options
+        self.outputs = None
 
     @PublicAPI
     def forward(self, input_dict, hidden_state):
@@ -34,6 +42,7 @@ class TorchModel(nn.Module):
         input_dict["obs"] = restore_original_dimensions(
             input_dict["obs"], self.obs_space, tensorlib=torch)
         outputs, features, vf, h = self._forward(input_dict, hidden_state)
+        self.outputs = outputs
         return outputs, features, vf, h
 
     @PublicAPI
