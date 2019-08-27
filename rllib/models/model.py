@@ -217,6 +217,8 @@ def restore_original_dimensions(obs, obs_space, tensorlib=tf):
             tensorlib = torch
         print(obs_space)
         print(obs)
+        import traceback, sys
+        traceback.print_stack(file=sys.stdout)
         return _unpack_obs(obs, obs_space.original_space, tensorlib=tensorlib)
     else:
         return obs
