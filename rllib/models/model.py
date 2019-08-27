@@ -215,6 +215,8 @@ def restore_original_dimensions(obs, obs_space, tensorlib=tf):
         elif tensorlib == "torch":
             import torch
             tensorlib = torch
+        print(obs_space)
+        print(obs)
         return _unpack_obs(obs, obs_space.original_space, tensorlib=tensorlib)
     else:
         return obs
